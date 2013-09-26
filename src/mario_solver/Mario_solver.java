@@ -38,10 +38,11 @@ public class Mario_solver {
         Task task = new ProgressTask(options);
         options.setMaxFPS(false);
         options.setVisualization(true);
-        options.setNumberOfTrials(2);
+        options.setNumberOfTrials(1);
         options.setMatlabFileName("");
+        //options.setMarioInvulnerable(true);
         options.setLevelRandSeed((int) (Math.random () * Integer.MAX_VALUE));
-        options.setLevelDifficulty(4);
+        options.setLevelDifficulty(1);
         task.setOptions(options);
 
         System.out.println ("Score: " + task.evaluate (controller)[0]);
