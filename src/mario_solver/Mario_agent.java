@@ -200,8 +200,8 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
             if(observation.isMarioOnGround())
                 if(NothingBehind(Total)){
                     //run();
-                    //goback();
-                    standby();
+                    goback();
+                    //standby();
                 }
             //run();
             if(ShallJumpEnemy(Enemies))
@@ -211,18 +211,20 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         if(NearBlockage(World)){
             //if(isBigBlockage(World))
             //    run(); 
-            if(RoadBlocked(World) && observation.mayMarioJump())
+            if(RoadBlocked(World) && (observation.mayMarioJump()))
                 jump();
-            if(!observation.isMarioOnGround())
+            if(RoadBlocked(World) && !observation.isMarioOnGround() )
                 jump();                        
         }
         
         if(NearLitleHole(World)){
             if(NearBigHole(World))
                 run();
+            else
+                walk();
             if(NextToAHole(World) && observation.mayMarioJump())
                 jump();
-            if(!observation.isMarioOnGround())
+            if(!observation.isMarioOnGround() && Action[Mario.KEY_JUMP] == true)
                 jump();
         }
         return Action;
