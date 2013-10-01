@@ -16,6 +16,8 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
     protected boolean Action[] = new boolean[Environment.numberOfButtons];
     protected String Name = "MarioAgent";
     protected boolean PrintOnce = true;
+    protected static final int MAXGOBACK = 10;
+    protected int CurrentGoBack = MAXGOBACK;
     @Override
     public void reset()
     {
@@ -71,7 +73,7 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
     
     private boolean ShallJumpEnemy(byte[][] obs){
        
-        if(obs[11][12] != 0 || obs[10][12] != 0)
+        if(obs[11][13] != 0 || obs[10][13] != 0 || obs[12][13] != 0)
             return true;
         return false;
     }
@@ -94,22 +96,34 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         return false;
     }
     
-    private boolean NearLitleHole(byte[][] obs){
-        if(obs[12][12] == 0 && obs[12][13] == 0  )
-            return true;
+    private boolean NearHole(byte[][] obs){
+        for(int i = 12;i< 22;i++)
+            if(obs[12][i] == 0)
+                return true;
         return false;
     }
     
-     private boolean NearBigHole(byte[][] obs){
-        if(obs[12][12] == 0 && obs[12][13] == 0 && obs[12][14] == 0 && obs[12][15] == 0  )
-            return true;
-        return false;
+     private boolean NearBigHole(byte[][] obs){  
+        int size = 0;
+        for(int i = 12;i< 18;i++)
+            if(obs[14][i] == 0 && size <5 )
+                size++; 
+            else{
+                if(size >= 5)
+                    return true;
+                else
+                    size = 0;
+            }
+        if(size < 5)
+            return false;
+        return true;
     }
      
-    private boolean NextToAHole (byte[][] obs){
-        if((obs[12][12] == 0 || obs[12][13] == 0) && (obs[16][12] == 0 || obs[16][13] == 0))
-            return true;
-        return false;
+    private boolean NextToAHole (byte[][] obs){        
+        for(int i =12; i< 22;i++)
+            if(obs[i][12] != 0 || obs[i][13] != 0 )
+                return false;
+        return true;
     }
     
     private boolean NothingBehind (byte[][] obs){
@@ -156,9 +170,12 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
     
     private void goback()
     {
-        Action[Mario.KEY_RIGHT] = false;
-        Action[Mario.KEY_SPEED] = false;
-        Action[Mario.KEY_LEFT] = true;
+        if(CurrentGoBack > 0){
+            Action[Mario.KEY_RIGHT] = false;
+            Action[Mario.KEY_SPEED] = false;
+            Action[Mario.KEY_LEFT] = true;
+            CurrentGoBack--;
+        }
     }
     
     private void jump()
@@ -204,8 +221,10 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
                     //standby();
                 }
             //run();
-            if(ShallJumpEnemy(Enemies))
-                jump();            
+            if(ShallJumpEnemy(Enemies)){
+                jump();  
+                CurrentGoBack = MAXGOBACK;
+            }
         }
         
         if(NearBlockage(World)){
@@ -216,17 +235,17 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
             if(RoadBlocked(World) && !observation.isMarioOnGround() )
                 jump();                        
         }
-        
-        if(NearLitleHole(World)){
+                
+        if( NearHole(World)){           
             if(NearBigHole(World))
                 run();
-            else
-                walk();
             if(NextToAHole(World) && observation.mayMarioJump())
                 jump();
+            
             if(!observation.isMarioOnGround() && Action[Mario.KEY_JUMP] == true)
                 jump();
         }
+        
         return Action;
     }
 
