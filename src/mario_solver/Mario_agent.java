@@ -212,21 +212,8 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         standby();
         
         //somthing is hapening
-        walk();                
-        if(EnemyInFrontSameLevel(Enemies)){
-            if(observation.isMarioOnGround())
-                if(NothingBehind(Total)){
-                    //run();
-                    goback();
-                    //standby();
-                }
-            //run();
-            if(ShallJumpEnemy(Enemies)){
-                jump();  
-                CurrentGoBack = MAXGOBACK;
-            }
-        }
-        
+        walk();          
+   
         if(NearBlockage(World)){
             //if(isBigBlockage(World))
             //    run(); 
@@ -239,11 +226,29 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         if( NearHole(World)){           
             if(NearBigHole(World))
                 run();
-            if(NextToAHole(World) && observation.mayMarioJump())
+            if(NextToAHole(World) && observation.mayMarioJump()){  
+                run();
                 jump();
-            
-            if(!observation.isMarioOnGround() && Action[Mario.KEY_JUMP] == true)
+            }
+            if(!observation.isMarioOnGround() && Action[Mario.KEY_JUMP] == true){
+                run();
                 jump();
+            }
+        }else
+            walk();
+        
+        if(EnemyInFrontSameLevel(Enemies)){
+            if(observation.isMarioOnGround())
+                if(NothingBehind(Total)){
+                    //run();
+                    goback();
+                    //standby();
+                }
+            //run();
+            if(ShallJumpEnemy(Enemies)){
+                jump();  
+                CurrentGoBack = MAXGOBACK;
+            }
         }
         
         return Action;
