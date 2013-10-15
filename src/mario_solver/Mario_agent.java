@@ -17,7 +17,8 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
     protected String Name = "MarioAgent";
     protected boolean PrintOnce = true;
     protected static final int MAXGOBACK = 10;
-    protected int CurrentGoBack = MAXGOBACK;
+    protected int CurrentGoBack = MAXGOBACK;  
+    private boolean StandBy = false;
     @Override
     public void reset()
     {
@@ -64,9 +65,9 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
     
     private boolean EnemyInFrontSameLevel(byte[][] obs){
        
-        if(obs[11][12] != 0 || obs[11][13] != 0 || obs[11][14] != 0 || obs[11][15] != 0)
+        if(obs[11][12] != 0 || obs[11][13] != 0 )
             return true;
-        if(obs[10][12] != 0 || obs[10][13] != 0 || obs[10][14] != 0 || obs[10][15] != 0)
+        if(obs[10][12] != 0 || obs[10][13] != 0 )
             return true;        
         return false;
     }
@@ -103,10 +104,18 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         return false;
     }
     
+     private boolean checkcolumn(byte[][] obs,int i,int j){
+         for(int k =0; k <21;k++){
+             if(obs[i][j]!=0)
+                 return false;
+         }
+         return true;
+     }
      private boolean NearBigHole(byte[][] obs){  
         int size = 0;
-        for(int i = 12;i< 18;i++)
-            if(obs[14][i] == 0 && size <5 )
+        for(int i = 12;i< 18;i++){           
+            
+            if(checkcolumn(obs,i , 12) && size <5 )
                 size++; 
             else{
                 if(size >= 5)
@@ -114,6 +123,7 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
                 else
                     size = 0;
             }
+        }
         if(size < 5)
             return false;
         return true;
@@ -178,6 +188,14 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         }
     }
     
+    private void fireball(boolean stop)
+    {
+        if(!stop){       
+            Action[Mario.KEY_SPEED] = !Action[Mario.KEY_SPEED] ;        
+        }else
+             Action[Mario.KEY_SPEED] = false;
+    }
+    
     private void jump()
     {
        Action[Mario.KEY_JUMP] = true;       
@@ -190,10 +208,14 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
     
      private void standby()
      {
-        Action[Mario.KEY_RIGHT] = false;
-        Action[Mario.KEY_SPEED] = false;
-        Action[Mario.KEY_LEFT]  = false;
-        Action[Mario.KEY_JUMP]  = false;
+        if(!StandBy){
+            Action[Mario.KEY_RIGHT] = false;
+            Action[Mario.KEY_SPEED] = false;
+            Action[Mario.KEY_LEFT]  = false;
+            Action[Mario.KEY_JUMP]  = false;
+            StandBy = true;
+        }
+        else StandBy = false;
      }
     // end shortcuts ------------------------------------------------------------------
     @Override
@@ -223,21 +245,24 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
                 jump();                        
         }
                 
-        if( NearHole(World)){           
+        if( NearHole(World)){             
             if(NearBigHole(World))
                 run();
-            if(NextToAHole(World) && observation.mayMarioJump()){  
-                run();
+            if(NextToAHole(World) && observation.mayMarioJump()){ 
+                
                 jump();
             }
-            if(!observation.isMarioOnGround() && Action[Mario.KEY_JUMP] == true){
-                run();
+            if(!observation.isMarioOnGround() && Action[Mario.KEY_JUMP] == true){                
                 jump();
             }
         }else
             walk();
         
         if(EnemyInFrontSameLevel(Enemies)){
+            if(observation.getMarioMode() >2 )
+                fireball(true);
+            else
+                fireball(false);
             if(observation.isMarioOnGround())
                 if(NothingBehind(Total)){
                     //run();
@@ -250,6 +275,7 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
                 CurrentGoBack = MAXGOBACK;
             }
         }
+            
         
         return Action;
     }
