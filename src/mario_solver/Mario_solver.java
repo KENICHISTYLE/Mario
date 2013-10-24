@@ -9,6 +9,7 @@ import ch.idsia.ai.agents.AgentsPool;
 import ch.idsia.ai.agents.human.HumanKeyboardAgent;
 import ch.idsia.ai.tasks.ProgressTask;
 import ch.idsia.ai.tasks.Task;
+import ch.idsia.mario.engine.sprites.Mario;
 import ch.idsia.tools.CmdLineOptions;
 import ch.idsia.tools.EvaluationOptions;
 
@@ -39,12 +40,12 @@ public class Mario_solver {
         options.setMaxFPS(false);
         options.setVisualization(true);
         options.setNumberOfTrials(1);
-        options.setMatlabFileName("");
+        
         //options.setMarioInvulnerable(true);
         options.setLevelRandSeed((int) (Math.random () * Integer.MAX_VALUE));
         options.setLevelDifficulty(1);
         task.setOptions(options);
-
+               
         System.out.println ("Score: " + task.evaluate (controller)[0]);
     }
 }

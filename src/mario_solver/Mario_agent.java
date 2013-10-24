@@ -19,12 +19,14 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
     protected static final int MAXGOBACK = 10;
     protected int CurrentGoBack = MAXGOBACK;  
     private boolean StandBy = false;
+    private float[] LastMarioPos; 
+    protected static final int MAXSTOP= 100;
+    protected int StopCount = MAXSTOP; 
+    protected int WalkCount = 0; 
     @Override
     public void reset()
     {
-        Action = new boolean[Environment.numberOfButtons];
-        Action[Mario.KEY_RIGHT] = true;
-        Action[Mario.KEY_SPEED] = true;
+        Action = new boolean[Environment.numberOfButtons];       
     }
 
     /**
@@ -136,10 +138,27 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         return true;
     }
     
+    private boolean thereIsFloor (byte[][] obs){
+    	if((obs[12][11] == 0) && !checkcolumn(obs, 13, 11))
+    		return true;
+    	return false;    		
+    }
+    
     private boolean NothingBehind (byte[][] obs){
         if(obs[11][10] != 0 || obs[11][9] != 0 || obs[12][10] == 0 || obs[12][9] == 0)
             return false;
         return true;
+    }
+    
+    private void savePos(Environment obs){
+    	LastMarioPos = obs.getMarioFloatPos();
+    }
+    private boolean marioPosHChange(Environment obs){
+    	float[] pos = obs.getMarioFloatPos();
+    	if(LastMarioPos != null)
+    		if(LastMarioPos[0] != pos[0])
+    			return true;
+    	return false;
     }
     /**
      * analyse the observation matrix
@@ -170,12 +189,16 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         Action[Mario.KEY_RIGHT] = true;
         Action[Mario.KEY_SPEED] = true;
         Action[Mario.KEY_LEFT] = false;
+        Action[Mario.KEY_DOWN] = false;
     }
     private void walk()
     {
         Action[Mario.KEY_RIGHT] = true;
         Action[Mario.KEY_SPEED] = false;
         Action[Mario.KEY_LEFT] = false;
+        Action[Mario.KEY_DOWN] = false;
+        if(WalkCount > 0)
+        	--WalkCount;
     }
     
     private void goback()
@@ -184,6 +207,7 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
             Action[Mario.KEY_RIGHT] = false;
             Action[Mario.KEY_SPEED] = false;
             Action[Mario.KEY_LEFT] = true;
+            Action[Mario.KEY_DOWN] = false;
             CurrentGoBack--;
         }
     }
@@ -198,7 +222,8 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
     
     private void jump()
     {
-       Action[Mario.KEY_JUMP] = true;       
+       Action[Mario.KEY_JUMP] = true;
+       Action[Mario.KEY_DOWN] = false;
     }
      
     private void unjump()
@@ -213,10 +238,36 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
             Action[Mario.KEY_SPEED] = false;
             Action[Mario.KEY_LEFT]  = false;
             Action[Mario.KEY_JUMP]  = false;
+            Action[Mario.KEY_DOWN] = false;
             StandBy = true;
         }
         else StandBy = false;
      }
+     private void getDown()
+     {
+    	 	Action[Mario.KEY_DOWN] = true;
+            Action[Mario.KEY_RIGHT] = false;
+            Action[Mario.KEY_SPEED] = false;
+            Action[Mario.KEY_LEFT]  = false;
+            Action[Mario.KEY_JUMP]  = false;
+            
+     }
+     private void stop()
+     {    	    
+    	 if(StopCount > 0 && WalkCount == 0){
+    	
+            Action[Mario.KEY_RIGHT] = false;          
+            Action[Mario.KEY_LEFT]  = false;
+            StopCount--;
+    	 }else{
+    		StopCount = MAXSTOP;
+    		WalkCount = MAXSTOP;
+            walk();
+    	 }
+     }
+  
+     
+     
     // end shortcuts ------------------------------------------------------------------
     @Override
     public boolean[] getAction(Environment observation)
@@ -225,10 +276,12 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
         byte[][] Enemies = observation.getEnemiesObservation();
         byte[][] World = observation.getLevelSceneObservation();
         byte[][] Total = observation.getCompleteObservation();
-        //show helper info
-        //if(PrintOnce){
-            scanObservation(observation);            
-        //}
+        int holeAndWall = 0;
+        
+        //show helper info    
+           // scanObservation(observation);            
+        
+        savePos(observation);
         
         //if nothing
         standby();
@@ -242,21 +295,23 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
             if(RoadBlocked(World) && (observation.mayMarioJump()))
                 jump();
             if(RoadBlocked(World) && !observation.isMarioOnGround() )
-                jump();                        
+                jump(); 
+            ++holeAndWall;
         }
                 
         if( NearHole(World)){             
             if(NearBigHole(World))
                 run();
             if(NextToAHole(World) && observation.mayMarioJump()){ 
-                
+            	
                 jump();
             }
             if(!observation.isMarioOnGround() && Action[Mario.KEY_JUMP] == true){                
                 jump();
             }
-        }else
-            walk();
+           
+            ++holeAndWall;
+        }
         
         if(EnemyInFrontSameLevel(Enemies)){
             if(observation.getMarioMode() >2 )
@@ -266,17 +321,22 @@ public class Mario_agent implements ch.idsia.ai.agents.Agent  {
             if(observation.isMarioOnGround())
                 if(NothingBehind(Total)){
                     //run();
-                    goback();
+                    //goback();
                     //standby();
                 }
             //run();
             if(ShallJumpEnemy(Enemies)){
                 jump();  
-                CurrentGoBack = MAXGOBACK;
+               // CurrentGoBack = MAXGOBACK;
             }
         }
-            
-        
+          
+       if(thereIsFloor(World) && marioPosHChange(observation)){
+    	   unjump();
+       // 	standby();
+       }
+       if(holeAndWall >= 2)
+    	  stop();
         return Action;
     }
 
