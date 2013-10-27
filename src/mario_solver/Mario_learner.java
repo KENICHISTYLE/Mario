@@ -12,29 +12,47 @@ import ch.idsia.mario.environments.Environment;
  */
 public class Mario_learner implements ch.idsia.ai.agents.Agent {
 
-    @Override
+    private Qlearn learninAlgo;
+    protected String Name = "StudentMario";
+    private boolean first = true;
+    
     public void reset() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        learninAlgo = new Qlearn();
+        first = true;
     }
 
     @Override
     public boolean[] getAction(Environment observation) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+       if(first){
+           learninAlgo.init(observation);
+           first = false;  
+           return learninAlgo.initAction();
+       }
+              
+       boolean[] ac = learninAlgo.learn(observation);
+       
+       return ac; 
     }
 
+    public void save(){
+        learninAlgo.saveLearning();
+    }
+    
     @Override
     public AGENT_TYPE getType() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return AGENT_TYPE.AI;
+    }
+ 
+    @Override
+    public String getName() {        
+        return Name;   
     }
 
+   
     @Override
-    public String getName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void setName(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setName(String Name) { 
+        this.Name = Name;    
     }
     
 }

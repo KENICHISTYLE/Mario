@@ -6,6 +6,17 @@ package mario_solver;
 
 import ch.idsia.mario.engine.sprites.Mario;
 import ch.idsia.mario.environments.Environment;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -16,7 +27,7 @@ public class Actions {
     protected boolean Action[] = new boolean[Environment.numberOfButtons];
     
     private int[][] _actions;
-    private int ACTION_NUMBER = 13;
+    public int ACTION_NUMBER = 13;
     private int _features;
     
     public int STOP               = 0;
@@ -37,6 +48,16 @@ public class Actions {
     Actions(int features){  
         _features = features;
         _actions = new int[ACTION_NUMBER][features];
+        
+        for(int i = 0; i < ACTION_NUMBER; i++){
+            for(int j = 0; j< _features; j++){
+                _actions[i][j] = 1;
+            }
+        }       
+        
+      //  for(int j = 0; j< _features; j++){
+       //     _actions[RIGHT][j] = 2;
+       // } 
     }
     
     Actions(int[][] actions){
@@ -264,6 +285,59 @@ public class Actions {
         return Action;
     }
     
+  public void saveLearningActions(String fileName){
+      
+        FileWriter fw;
+        try {
+            fw = new FileWriter (fileName);
+        
+            BufferedWriter bw = new BufferedWriter (fw);
+            PrintWriter out = new PrintWriter (bw);
+            
+            for(int[] ac :_actions){
+                for(int f : ac){                    
+                    out.write(f+"\t");
+                }
+                out.write("\n");
+            }    
+            
+            out.close();
+      
+      } catch (IOException ex) {
+            Logger.getLogger(Actions.class.getName()).log(Level.SEVERE, null, ex);
+        }
+  }
   
+  public boolean loadLearningActions(String fileName){
+      
+      File f = new File(fileName);
+      try (Scanner scanner =  new Scanner(f)){
+        
+        int i = 0;
+          
+        while (scanner.hasNextLine() && i < ACTION_NUMBER){         
+          String line = scanner.nextLine();
+          String parts[] = line.split("\t");
+          System.out.println(parts[0]);
+          for(int j = 0; j< _features; j++){                    
+              try{
+                  int temp = Integer.parseInt(parts[j]);
+                  _actions[i][j] = temp;
+              } catch(NumberFormatException e){
+                  System.out.println(" Parse error");
+                  return false;
+              }                  
+          } 
+          i++;
+        } 
+        
+        scanner.close();
+        return true;
+        
+     }  catch (FileNotFoundException ex) {
+            System.out.println(" Save file not found");
+            return false;
+        }
+  }
     
 }

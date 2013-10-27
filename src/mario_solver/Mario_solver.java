@@ -31,21 +31,24 @@ public class Mario_solver {
         //}
         
         //creating the ai agent
-        Mario_agent controller = new Mario_agent();
+        //Mario_agent controller = new Mario_agent();
+        Mario_learner controller = new Mario_learner();
         AgentsPool.addAgent(controller);
         // loading the game
         EvaluationOptions options = new CmdLineOptions(new String[0]);
         options.setAgent(controller);
         Task task = new ProgressTask(options);
-        options.setMaxFPS(false);
+        options.setMaxFPS(true);
         options.setVisualization(true);
-        options.setNumberOfTrials(1);
+        options.setNumberOfTrials(0);
         
         //options.setMarioInvulnerable(true);
         options.setLevelRandSeed((int) (Math.random () * Integer.MAX_VALUE));
-        options.setLevelDifficulty(1);
+        options.setLevelDifficulty(0);
         task.setOptions(options);
                
         System.out.println ("Score: " + task.evaluate (controller)[0]);
+        System.out.println("err");
+        controller.save();
     }
 }
