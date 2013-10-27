@@ -31,19 +31,19 @@ public class State {
     
     public int[] updateState(Environment obs){
         
-       byte[][] compObs = obs.getCompleteObservation();
+       byte[][] eObs = obs.getEnemiesObservation();
        
-        _state[0] = obs.mayMarioJump()?1:2;
-        _state[1] = obs.isMarioOnGround()?1:2;
+        _state[0] = obs.mayMarioJump()?1:10;
+        _state[1] = obs.isMarioOnGround()?1:5;
         _state[2] = obs.getMarioMode();
         _state[3] = obs.getKillsTotal();
-        _state[4] = compObs[11][10];
-        _state[5] = compObs[11][12];       
+        _state[4] = (eObs[11][10] == 0)?1:2;
+        _state[5] = (eObs[11][12] == 0)?1:2;       
         
         _marioPos = obs.getMarioFloatPos();      
         
         if(_marioPos[0] > _PrevMarioPos)
-            _state[6] = 11;
+            _state[6] = 12;
         else
             _state[6] = 10;
         

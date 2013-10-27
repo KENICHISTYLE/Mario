@@ -17,14 +17,17 @@ public class Qlearn {
     private int _prevActionId;
     private final String _saveFile;
     private float _learningRate = 0.1f;
+    private int BONUS = 50;
+    private int MAX_PERMIT_ADD = 1000;
     
-    Qlearn(){        
+    Qlearn(boolean load){        
         this._saveFile = "SaveActions.txt";
         _prevState = new State();
         _currentState = new State();
         
          _actions = new Actions(_currentState.FEATCHURES);
-         _actions.loadLearningActions(_saveFile);
+         if(load)
+            _actions.loadLearningActions(_saveFile);
          
         _prevActionId = 0;
     }
@@ -108,44 +111,88 @@ public class Qlearn {
          int[] state = _currentState._state;
          // punish
          // better if he can jump
-         if(state[0] == 2 ){
-             ac[0] -= 1;             
+         if(state[0] == 10 ){
+             ac[0] = limitAdd(-1, ac[0]);             
          }   
          // better on the ground
-         if(state[1] == 2 ){
-             ac[1] -= 1;             
+         if(state[1] == 5 ){
+             ac[1] = limitAdd(-1, ac[1]);             
          }   
          // do not lose your power
          if(state[2] <  prevState[2]){
-             ac[2] -= 1;             
+             ac[2] = limitAdd(-1, ac[2]);             
          }   
-             
+         if(state[4] == 2 ){
+             ac[4] = limitAdd(-1, ac[4]);             
+         }       
+         if(state[5] == 2 ){
+             ac[5] = limitAdd(-1, ac[5]);             
+         }       
          // move right
          if(state[6] == 10){
-             ac[6] -=1; 
+             ac[6] = limitAdd(-1, ac[6]); 
          }
          // reward
          // better if can jump
          if(state[0] == 1 ){
-             ac[0] += 11;             
+             ac[0] = limitAdd(1, ac[0]);             
          }   
          // better if on the ground
          if(state[1] == 1 ){
-             ac[1] += 1;             
+             ac[1] = limitAdd(1, ac[1]);            
          }   
          // do not loose your power
          if(state[2] > prevState[2] ){
-             ac[2] += 1;             
+             ac[2] = limitAdd(1, ac[2]);             
          }   
          // it is good to kill enemies
          if(state[3] > prevState[3]){
-             ac[1] += 1;             
+             ac[3] = limitAdd(1, ac[3]);             
          }   
         
+         if(state[4] == 1 ){
+            // ac[4] += 1;             
+         }       
+         if(state[5] == 1 ){
+             ac[5] = limitAdd(1, ac[5]);;             
+         }      
+         
           // move right
          if(state[6] > 10){
-             ac[6] +=1; 
+             ac[6] = limitAdd(1, ac[6]);
          }
               
     }
+    
+    public void bonusAction(){
+        int[] ac = _actions.getAction(_prevActionId);
+        for(int i = 0; i < _currentState.FEATCHURES; i++){
+            ac[i] = limitAdd(BONUS, ac[i]);
+        }
+        
+        System.out.println(" BONUS : La derniere action est " + _actions.getActionName(_prevActionId));
+    }
+    
+    public void manusAction(){
+        int[] ac = _actions.getAction(_prevActionId);
+        for(int i = 0; i < _currentState.FEATCHURES; i++){
+            ac[i] = limitAdd(-BONUS*2, ac[i]);
+        }
+        
+        System.out.println(" MANUS : La derniere action est " + _actions.getActionName(_prevActionId));
+    }
+    
+    private int limitAdd(int addVal,int currentVal){
+        
+        int temp = currentVal+addVal;
+        
+        if( temp > MAX_PERMIT_ADD)
+            return MAX_PERMIT_ADD;
+        
+        if( temp < -MAX_PERMIT_ADD)
+            return -MAX_PERMIT_ADD;
+        
+        return temp;
+    }
+    
 }

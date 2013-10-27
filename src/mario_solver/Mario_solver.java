@@ -37,18 +37,22 @@ public class Mario_solver {
         // loading the game
         EvaluationOptions options = new CmdLineOptions(new String[0]);
         options.setAgent(controller);
-        Task task = new ProgressTask(options);
+        //Task task = new ProgressTask(options);
+        MySpecialTrialTask task = new MySpecialTrialTask(options);
         options.setMaxFPS(true);
         options.setVisualization(true);
         options.setNumberOfTrials(0);
-        
+        options.setExitProgramWhenFinished(true);
         //options.setMarioInvulnerable(true);
         options.setLevelRandSeed((int) (Math.random () * Integer.MAX_VALUE));
         options.setLevelDifficulty(0);
         task.setOptions(options);
                
         System.out.println ("Score: " + task.evaluate (controller)[0]);
-        System.out.println("err");
-        controller.save();
+        System.out.println(" Gonna save ");
+        
+        controller.save(task.isMarioDeadOrDidHeWin());
+        System.out.println(" Saved ");
+        System.exit(0);
     }
 }

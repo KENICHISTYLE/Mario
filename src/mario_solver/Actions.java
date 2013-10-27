@@ -293,12 +293,13 @@ public class Actions {
         
             BufferedWriter bw = new BufferedWriter (fw);
             PrintWriter out = new PrintWriter (bw);
-            
+            int i = 0 ;
             for(int[] ac :_actions){
                 for(int f : ac){                    
                     out.write(f+"\t");
                 }
-                out.write("\n");
+                out.write(getActionName(i)+"\n");
+                i++;
             }    
             
             out.close();

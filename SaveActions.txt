@@ -1,0 +1,13 @@
+-932	-630	1	1	1	934	-914	stop
+900	900	-199	-199	-199	900	105	right
+-1	-1	1	1	1	3	-1	left
+3	3	1	1	0	11	-7	down
+-2	4	1	1	1	4	-2	jump
+-4	2	1	1	1	6	-2	jump speed
+-884	166	-99	-99	-109	680	276	jump right
+-1	-1	1	1	1	3	-1	jump right speed
+-1	-1	1	1	1	3	-1	jump left
+-1	-1	1	1	1	3	-1	jump left speed
+-1	-1	1	1	1	3	-1	right speed
+-1	-1	1	1	1	3	-1	left speed
+-1	1	1	1	1	5	-1	fire ball

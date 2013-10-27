@@ -13,11 +13,11 @@ import ch.idsia.mario.environments.Environment;
 public class Mario_learner implements ch.idsia.ai.agents.Agent {
 
     private Qlearn learninAlgo;
-    protected String Name = "StudentMario";
+    protected String Name = "Mario the student !";
     private boolean first = true;
     
     public void reset() {
-        learninAlgo = new Qlearn();
+        learninAlgo = new Qlearn(true);
         first = true;
     }
 
@@ -35,7 +35,13 @@ public class Mario_learner implements ch.idsia.ai.agents.Agent {
        return ac; 
     }
 
-    public void save(){
+    public void save(boolean lastAction){
+        
+        if(lastAction)
+            learninAlgo.bonusAction();
+        else
+            learninAlgo.manusAction();
+        
         learninAlgo.saveLearning();
     }
     
